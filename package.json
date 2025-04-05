@@ -4,7 +4,14 @@
   "description": "eWegen Backend For Frontend component",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./bin/www",
+    "debug": "DEBUG=ewegen-bff:* npm start",
+    "dev": "nodemon --inspect ./bin/www",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "Erol Zavidic",
@@ -15,6 +22,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
+    "cookie-parser": "~1.4.7",
     "winston": "^3.17.0"
   },
   "devDependencies": {
@@ -27,6 +35,9 @@
     "supertest": "^7.1.0",
     "ts-jest": "^29.3.1",
     "ts-node": "^10.9.2",
+    "debug": "~4.4.0",
+    "@types/debug": "~4.1.12",
+    "@types/cookie-parser": "~1.4.8",
     "typescript": "^5.8.2"
   }
 }
