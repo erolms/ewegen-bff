@@ -1,25 +1,25 @@
-#!/usr/bin/env node
+// @ts-check
 
 /**
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('ewegen-bff:server');
-var http = require('http');
+import app from './app';
+import debug from 'debug';
+import http from 'http';
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -33,8 +33,8 @@ server.on('listening', onListening);
  * Normalize a port into a number, string, or false.
  */
 
-function normalizePort(val) {
-  var port = parseInt(val, 10);
+function normalizePort(val: string): string | number | false {
+  const port = parseInt(val, 10);
 
   if (isNaN(port)) {
     // named pipe
@@ -53,7 +53,7 @@ function normalizePort(val) {
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error) {
+function onError(error: { syscall: string; code: any; }) {
   if (error.syscall !== 'listen') {
     throw error;
   }
@@ -82,9 +82,12 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
+  const addr = server.address();
+  const bind = typeof addr === 'string'
     ? 'pipe ' + addr
-    : 'port ' + addr.port;
+    : 'port ' + addr?.port;
+  console.log('Server listening on http://localhost:' + port);
   debug('Listening on ' + bind);
 }
+
+export default app;

@@ -4,5 +4,8 @@
     "node_modules/**/node_modules"
   ],
   "verbose": true,
+  "execMap": {
+        "ts": "ts-node"
+  },
   "ext": "js,mjs,cjs,json,ts,pug"
 }
