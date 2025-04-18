@@ -53,7 +53,7 @@ function normalizePort(val: string): string | number | false {
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error: { syscall: string; code: any; }) {
+function onError(error: { syscall: string; code: string; }) {
   if (error.syscall !== 'listen') {
     throw error;
   }

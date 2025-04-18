@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 
 const router: Router = Router();
 
-router.get('/', (req: Request, res: Response, next: NextFunction) => {
+router.get('/', (_req: Request, res: Response, _next: NextFunction) => {
   const status = {
     status: 'ok',
     message: 'eWegen BFF is running',

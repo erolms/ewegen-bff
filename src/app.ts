@@ -54,16 +54,16 @@ const app = express();
 
 // Use Morgan for HTTP request logging, output to Winston
 app.use(morgan('combined', {
-  skip: function (req, res) { return res.statusCode > 399 },
+  skip: function (_req, res) { return res.statusCode > 399 },
   stream: { write: (message: string) => logger.info(message.trim()) },
 }))
 app.use(morgan('combined', {
-  skip: function (req, res) { return res.statusCode < 400 },
+  skip: function (_req, res) { return res.statusCode < 400 },
   stream: { write: (message: string) => logger.error(message.trim()) },
 }))
 
 // Error handling middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   logger.error('Error occurred', { error: err.message, stack: err.stack });
   res.status(500).json({ error: 'Internal Server Error' });
 });
