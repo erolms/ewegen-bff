@@ -53,7 +53,14 @@ const logger = winston.createLogger({
 const app = express();
 
 // Use Morgan for HTTP request logging, output to Winston
-app.use(morgan('combined', { stream: { write: (message: string) => logger.info(message.trim()) } }));
+app.use(morgan('combined', {
+  skip: function (req, res) { return res.statusCode > 399 },
+  stream: { write: (message: string) => logger.info(message.trim()) },
+}))
+app.use(morgan('combined', {
+  skip: function (req, res) { return res.statusCode < 400 },
+  stream: { write: (message: string) => logger.error(message.trim()) },
+}))
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
