@@ -10,8 +10,8 @@
     "serve": "node dist/ewegen-bff-service.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "lint": "eslint . --ext .js,.ts",
-    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "commit": "cz",
     "build": "tsc"
   },
