@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import morgan from 'morgan';
-import { createStream } from 'rotating-file-stream';
 import indexRouter from './routes/index';
 
 // Configure Winston logger
@@ -49,13 +48,6 @@ const logger = winston.createLogger({
       )
     })
   ]
-});
-
-// Create a stream for Morgan to use with Winston
-const accessLogStream = createStream('access.log', {
-  interval: '1d',
-  path: path.join(__dirname, '../logs'),
-  compress: 'gzip'
 });
 
 const app = express();

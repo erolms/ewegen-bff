@@ -58,7 +58,7 @@ function onError(error: { syscall: string; code: any; }) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
+  const bind = typeof port === 'string'
     ? 'Pipe ' + port
     : 'Port ' + port;
 
