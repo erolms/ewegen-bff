@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node ./src/ewegen-bff-service",
     "debug": "DEBUG=ewegen-bff:* npm start",
-    "dev": "nodemon --inspect ./src/ewegen-bff-service",
+    "dev": "nodemon -w ./src",
     "serve": "node dist/ewegen-bff-service.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
