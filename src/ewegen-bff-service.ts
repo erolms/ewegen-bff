@@ -7,6 +7,7 @@
 import app from './app';
 import debug from 'debug';
 import http from 'http';
+import { normalizePort } from './utils/port';
 
 /**
  * Get port from environment and store in Express.
@@ -28,26 +29,6 @@ const server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-
-/**
- * Normalize a port into a number, string, or false.
- */
-
-function normalizePort(val: string): string | number | false {
-  const port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-}
 
 /**
  * Event listener for HTTP server "error" event.
