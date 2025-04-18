@@ -18,7 +18,10 @@ export default tseslint.config(
   },
   {
     // Exclude the dist folder from linting
-    ignores: ['dist/**/*'],
+    ignores: [
+      'dist/**/*',
+      './jest.config.js',
+    ],
   },
   {
     rules: {
