@@ -109,11 +109,11 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/develop' }}
-            type=raw,value=latest-dev,enable=${{ github.ref == 'refs/heads/develop' }}
-            type=raw,value=sha-${{ github.sha }},enable=${{ github.ref == 'refs/heads/develop' }}
-            type=semver,pattern={{version}}-dev,enable=${{ github.ref == 'refs/heads/develop' }}
-            type=semver,pattern={{major}}.{{minor}}-dev,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=raw,value=dev
+            type=raw,value=latest-dev
+            type=raw,value=sha-${{ github_sha_hash:0:7 }}
+            type=semver,pattern={{version}}-dev
+            type=semver,pattern={{major}}.{{minor}}-dev
 
       - name: Build and push development image
         uses: docker/build-push-action@v5
@@ -178,11 +178,11 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=prod,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=sha-${{ github.sha }},enable=${{ github.ref == 'refs/heads/main' }}
-            type=semver,pattern={{version}},enable=${{ github.ref == 'refs/heads/main' }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=prod
+            type=raw,value=latest
+            type=raw,value=sha-${{ github_sha_hash:0:7 }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push production image
         uses: docker/build-push-action@v5
