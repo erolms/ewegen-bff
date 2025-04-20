@@ -33,11 +33,11 @@ logs
 .DS_Store
 Thumbs.db
 
-# Test files
-tests
-__tests__
-*.test.ts
-*.spec.ts
+# Test files will be excluded manually
+# tests
+# __tests__
+# *.test.ts
+# *.spec.ts
 
 # Documentation
 README.md
