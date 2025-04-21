@@ -199,6 +199,8 @@ jobs:
     name: Security Scan
     needs: build-prod
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -233,4 +235,22 @@ jobs:
           name: trivy-scan-results
           path: trivy-results.txt
           if-no-files-found: warn
+          retention-days: 14
+
+      - name: Generate SBOM
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod
+          scan-type: image
+          format: 'github'
+          output: 'dependency-results.sbom.json'
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
+          severity: 'CRITICAL,HIGH'
+          scanners: 'vuln'
+
+      - name: Upload trivy SBOM report as a Github artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-sbom-report
+          path: '${{ github.workspace }}/dependency-results.sbom.json'
           retention-days: 14
