@@ -50,6 +50,7 @@ logs
 # Coverage reports
 coverage/
 .nyc_output/
+junit.xml
 
 # Build outputs
 dist/

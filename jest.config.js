@@ -15,5 +15,6 @@ module.exports = {
     '/dist/',
     '/tests/',
   ],
+  reporters: ['default', 'jest-junit', 'summary'],
   verbose: true,
 };
