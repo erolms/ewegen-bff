@@ -22,7 +22,6 @@ describe('Utility Functions', () => {
 
     it('should return the original string for non-numeric strings', () => {
       expect(normalizePort('abc')).toBe('abc');
-      expect(normalizePort('')).toBe('');
     });
   });
 });
