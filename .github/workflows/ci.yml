@@ -217,7 +217,7 @@ jobs:
         run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.30
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod
           format: 'table'
@@ -228,7 +228,9 @@ jobs:
           output: 'trivy-results.txt'
 
       - name: Upload Trivy scan results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-scan-results
           path: trivy-results.txt
+          if-no-files-found: warn
+          retention-days: 14
