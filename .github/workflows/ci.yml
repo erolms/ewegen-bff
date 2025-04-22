@@ -31,7 +31,7 @@ jobs:
         run: npm run lint
 
   test:
-    name: Test
+    name: Tests and static analysis
     needs: lint
     runs-on: ubuntu-latest
     steps:
@@ -66,23 +66,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./junit.xml
 
-  static-analysis:
-    name: Static Analysis
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
       - name: Run SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
@@ -91,7 +74,7 @@ jobs:
 
   build-dev:
     name: Build Development Image
-    needs: static-analysis
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
