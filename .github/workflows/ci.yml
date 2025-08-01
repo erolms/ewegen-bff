@@ -51,7 +51,7 @@ jobs:
 
   test:
     name: Tests and static analysis
-    needs: lint
+    needs: [lint, security-audit]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
