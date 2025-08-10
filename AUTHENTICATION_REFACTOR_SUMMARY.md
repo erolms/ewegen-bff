@@ -160,30 +160,30 @@ src/
 
 1. **Create a new driver**:
 
-```typescript
-// src/services/auth-drivers/auth0-driver.ts
-export class Auth0Driver {
-  async registerUser(data: UserRegistrationData): Promise<AuthResult> {
-    // Auth0-specific implementation
-  }
-  // ... other methods
-}
-```
+   ```typescript
+   // src/services/auth-drivers/auth0-driver.ts
+   export class Auth0Driver {
+     async registerUser(data: UserRegistrationData): Promise<AuthResult> {
+       // Auth0-specific implementation
+     }
+     // ... other methods
+   }
+   ```
 
 2. **Update the service**:
 
-```typescript
-// src/services/auth-service.ts
-export class AuthService {
-  private driver: AuthDriver; // Can be Cognito, Auth0, etc.
-  
-  constructor(driverType: 'cognito' | 'auth0' = 'cognito') {
-    this.driver = driverType === 'cognito' 
-      ? new CognitoAuthDriver() 
-      : new Auth0Driver();
-  }
-}
-```
+   ```typescript
+   // src/services/auth-service.ts
+   export class AuthService {
+     private driver: AuthDriver; // Can be Cognito, Auth0, etc.
+
+     constructor(driverType: 'cognito' | 'auth0' = 'cognito') {
+       this.driver = driverType === 'cognito' 
+         ? new CognitoAuthDriver() 
+         : new Auth0Driver();
+     }
+   }
+   ```
 
 ### Testing the Service
 
