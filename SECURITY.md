@@ -7,6 +7,7 @@ This document outlines security practices and procedures for the eWegen BFF serv
 ### Dependency Management
 
 1. **Regular Security Audits**
+
    ```bash
    # Run security audit
    npm run security:audit
@@ -60,6 +61,7 @@ This document outlines security practices and procedures for the eWegen BFF serv
 ### Response Process
 
 1. **Immediate Actions**
+
    ```bash
    # Check for vulnerabilities
    npm audit
@@ -127,4 +129,4 @@ This document outlines security practices and procedures for the eWegen BFF serv
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [Node.js Security Best Practices](https://nodejs.org/en/docs/guides/security/)
-- [npm Security](https://docs.npmjs.com/about-audit-reports) 
+- [npm Security](https://docs.npmjs.com/about-audit-reports)

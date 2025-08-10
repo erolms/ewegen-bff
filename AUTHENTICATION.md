@@ -38,6 +38,7 @@ The authentication system integrates with AWS Cognito to provide secure user aut
 ## Features
 
 ### Authentication Features
+
 - ✅ User registration with email confirmation
 - ✅ Secure login with JWT tokens
 - ✅ Token refresh mechanism
@@ -47,6 +48,7 @@ The authentication system integrates with AWS Cognito to provide secure user aut
 - ✅ Token expiration handling
 
 ### Authorization Features
+
 - ✅ Role-based access control (RBAC)
 - ✅ Multiple role support per user
 - ✅ Admin, Member, Volunteer, and Guest roles
@@ -54,6 +56,7 @@ The authentication system integrates with AWS Cognito to provide secure user aut
 - ✅ Optional authentication for public endpoints
 
 ### Security Features
+
 - ✅ JWT token verification using AWS Cognito public keys
 - ✅ Token expiration validation
 - ✅ Secure password requirements
@@ -101,6 +104,7 @@ The system supports four user roles:
 ### Environment Variables
 
 #### Required Variables
+
 ```bash
 COGNITO_USER_POOL_ID=eu-central-1_yourpoolid
 COGNITO_CLIENT_ID=your-client-id
@@ -108,6 +112,7 @@ AWS_REGION=eu-central-1
 ```
 
 #### Optional Variables
+
 ```bash
 AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key
@@ -120,6 +125,7 @@ COGNITO_VOLUNTEER_GROUP=volunteer-group
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -127,6 +133,7 @@ npm install
 2. Set environment variables (see above)
 
 3. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -136,12 +143,15 @@ npm run dev
 ### Authentication Endpoints
 
 #### Health Check
+
 ```http
 GET /auth/health
 ```
+
 Returns authentication service status and configuration.
 
 #### User Registration
+
 ```http
 POST /auth/register
 Content-Type: application/json
@@ -155,6 +165,7 @@ Content-Type: application/json
 ```
 
 #### User Login
+
 ```http
 POST /auth/login
 Content-Type: application/json
@@ -166,6 +177,7 @@ Content-Type: application/json
 ```
 
 #### Confirm Registration
+
 ```http
 POST /auth/confirm
 Content-Type: application/json
@@ -177,6 +189,7 @@ Content-Type: application/json
 ```
 
 #### Refresh Token
+
 ```http
 POST /auth/refresh
 Content-Type: application/json
@@ -187,12 +200,14 @@ Content-Type: application/json
 ```
 
 #### User Profile
+
 ```http
 GET /auth/profile
 Authorization: Bearer your-access-token
 ```
 
 #### Change Password
+
 ```http
 POST /auth/change-password
 Authorization: Bearer your-access-token
@@ -205,6 +220,7 @@ Content-Type: application/json
 ```
 
 #### Logout
+
 ```http
 POST /auth/logout
 Authorization: Bearer your-access-token
@@ -218,36 +234,42 @@ Content-Type: application/json
 ### Protected Endpoints
 
 #### User Information
+
 ```http
 GET /protected/user-info
 Authorization: Bearer your-access-token
 ```
 
 #### Admin Dashboard (Admin only)
+
 ```http
 GET /protected/admin-dashboard
 Authorization: Bearer your-access-token
 ```
 
 #### Member Profile (Member/Admin only)
+
 ```http
 GET /protected/member-profile
 Authorization: Bearer your-access-token
 ```
 
 #### Volunteer Tasks (Volunteer/Admin only)
+
 ```http
 GET /protected/volunteer-tasks
 Authorization: Bearer your-access-token
 ```
 
 #### Community Events (Member/Volunteer/Admin)
+
 ```http
 GET /protected/community-events
 Authorization: Bearer your-access-token
 ```
 
 #### Protected Health Check
+
 ```http
 GET /protected/health
 Authorization: Bearer your-access-token
@@ -352,16 +374,19 @@ if (checkUserRole(user, ['admin'])) {
 ## Testing
 
 ### Run Tests
+
 ```bash
 npm test
 ```
 
 ### Run Tests with Coverage
+
 ```bash
 npm run test:coverage
 ```
 
 ### Test Structure
+
 - **Configuration Tests**: Environment variable validation
 - **Middleware Tests**: JWT validation and RBAC
 - **Route Tests**: API endpoint functionality
@@ -370,22 +395,26 @@ npm run test:coverage
 ## Security Considerations
 
 ### Token Security
+
 - JWT tokens are validated using AWS Cognito public keys
 - Tokens have expiration times
 - Refresh tokens are used for long-term sessions
 - Tokens are revoked on logout
 
 ### Password Security
+
 - Passwords must meet AWS Cognito requirements
 - Password changes require old password verification
 - Failed login attempts are logged
 
 ### Role Security
+
 - Role assignments are managed through AWS Cognito groups
 - Role validation happens on every protected request
 - Access denied events are logged for security monitoring
 
 ### Error Handling
+
 - Sensitive information is not exposed in error messages
 - All authentication failures are logged
 - Rate limiting should be implemented in production
@@ -393,6 +422,7 @@ npm run test:coverage
 ## Monitoring and Logging
 
 ### Authentication Events
+
 - User registration and confirmation
 - Login and logout events
 - Token refresh attempts
@@ -400,6 +430,7 @@ npm run test:coverage
 - Access denied events
 
 ### Security Monitoring
+
 - Failed authentication attempts
 - Token validation failures
 - Role-based access violations
@@ -408,12 +439,14 @@ npm run test:coverage
 ## Production Deployment
 
 ### Environment Setup
+
 1. Configure production AWS Cognito User Pool
 2. Set up proper IAM roles and permissions
 3. Configure environment variables
 4. Set up monitoring and alerting
 
 ### Security Hardening
+
 1. Enable HTTPS only
 2. Implement rate limiting
 3. Set up security headers
@@ -421,6 +454,7 @@ npm run test:coverage
 5. Enable audit logging
 
 ### Performance Optimization
+
 1. Implement JWK caching
 2. Use connection pooling for AWS SDK
 3. Monitor token validation performance
@@ -451,7 +485,9 @@ npm run test:coverage
    - Ensure proper IAM permissions
 
 ### Debug Mode
+
 Enable debug logging by setting the environment variable:
+
 ```bash
 DEBUG=ewegen-bff:*
 npm run debug
@@ -460,6 +496,7 @@ npm run debug
 ## Future Enhancements
 
 ### Planned Features
+
 - Multi-factor authentication (MFA)
 - Social login integration
 - Password reset functionality
@@ -468,6 +505,7 @@ npm run debug
 - Audit trail implementation
 
 ### Scalability Improvements
+
 - Redis-based token caching
 - Distributed session management
 - Load balancing considerations
@@ -488,4 +526,4 @@ When contributing to the authentication system:
 - [AWS Cognito Documentation](https://docs.aws.amazon.com/cognito/)
 - [JWT.io](https://jwt.io/) - JWT token debugging
 - [Express.js Security Best Practices](https://expressjs.com/en/advanced/best-practices-security.html)
-- [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) 
+- [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
