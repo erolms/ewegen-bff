@@ -26,12 +26,13 @@
     "form-data": "^4.0.4"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.0.0",
     "@types/morgan": "^1.9.9",
-    "aws-sdk": "^2.1692.0",
     "cookie-parser": "~1.4.7",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "rotating-file-stream": "^3.2.6",
     "winston": "^3.17.0",
@@ -43,6 +44,7 @@
     "@types/debug": "~4.1.12",
     "@types/express": "^5.0.1",
     "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.14.0",
     "@types/supertest": "^6.0.3",
     "commitizen": "^4.3.1",
