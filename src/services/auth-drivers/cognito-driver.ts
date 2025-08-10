@@ -9,10 +9,16 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import winston from 'winston';
 
+// Error interface for AWS SDK errors
+interface AWSError extends Error {
+  name: string;
+  code?: string;
+}
+
 // Authentication result interfaces
 export interface AuthResult {
   success: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
   error?: string;
   challenge?: string;
   session?: string;
@@ -128,7 +134,7 @@ export class CognitoAuthDriver {
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const errorName = error instanceof Error ? (error as any).name : 'UnknownError';
+      const errorName = error instanceof Error ? (error as AWSError).name : 'UnknownError';
       
       this.logger.error('User registration failed', { 
         error: errorMessage, 
@@ -191,7 +197,7 @@ export class CognitoAuthDriver {
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const errorName = error instanceof Error ? (error as any).name : 'UnknownError';
+      const errorName = error instanceof Error ? (error as AWSError).name : 'UnknownError';
       
       this.logger.error('User login failed', { 
         error: errorMessage, 
@@ -228,7 +234,7 @@ export class CognitoAuthDriver {
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const errorName = error instanceof Error ? (error as any).name : 'UnknownError';
+      const errorName = error instanceof Error ? (error as AWSError).name : 'UnknownError';
       
       this.logger.error('User confirmation failed', { 
         error: errorMessage, 
@@ -280,7 +286,7 @@ export class CognitoAuthDriver {
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const errorName = error instanceof Error ? (error as any).name : 'UnknownError';
+      const errorName = error instanceof Error ? (error as AWSError).name : 'UnknownError';
       
       this.logger.error('Token refresh failed', { 
         error: errorMessage, 
@@ -366,7 +372,7 @@ export class CognitoAuthDriver {
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const errorName = error instanceof Error ? (error as any).name : 'UnknownError';
+      const errorName = error instanceof Error ? (error as AWSError).name : 'UnknownError';
       
       this.logger.error('User logout failed', { 
         error: errorMessage, 
@@ -403,7 +409,7 @@ export class CognitoAuthDriver {
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const errorName = error instanceof Error ? (error as any).name : 'UnknownError';
+      const errorName = error instanceof Error ? (error as AWSError).name : 'UnknownError';
       
       this.logger.error('Password change failed', { 
         error: errorMessage, 

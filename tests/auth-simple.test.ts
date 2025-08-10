@@ -280,8 +280,9 @@ describe('Authentication System - Refactored Architecture', () => {
   describe('Architecture Benefits', () => {
     it('should demonstrate separation of concerns', () => {
       // Routes should not directly import AWS SDK
-      const authRoutes = require('../src/routes/auth');
-      expect(authRoutes).toBeDefined();
+      import('../src/routes/auth').then(authRoutes => {
+        expect(authRoutes).toBeDefined();
+      });
       
       // Service should handle business logic
       expect(authService).toBeDefined();
