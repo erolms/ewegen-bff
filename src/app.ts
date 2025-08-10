@@ -8,6 +8,8 @@ import DailyRotateFile from 'winston-daily-rotate-file';
 import morgan from 'morgan';
 import { errorHandler } from './middlewares/error-middleware';
 import indexRouter from './routes/index';
+import authRoutes from './routes/auth';
+import protectedRoutes from './routes/protected';
 
 // Configure Winston logger
 const logger = winston.createLogger({
@@ -72,7 +74,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Error handling middleware
 app.use(errorHandler);
 
+// Application routes
 app.use('/', indexRouter);
+app.use('/auth', authRoutes);
+app.use('/protected', protectedRoutes);
 
 // Log application startup
 logger.info('eWegen BFF application started');

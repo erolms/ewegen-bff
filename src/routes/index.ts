@@ -1,6 +1,4 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import authRoutes from './auth';
-import protectedRoutes from './protected';
 
 const router: Router = Router();
 
@@ -13,11 +11,5 @@ router.get('/', (_req: Request, res: Response, _next: NextFunction) => {
   };
   res.status(200).json(status);
 });
-
-// Authentication routes
-router.use('/auth', authRoutes);
-
-// Protected routes (require authentication)
-router.use('/protected', protectedRoutes);
 
 export default router;
