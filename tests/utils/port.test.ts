@@ -1,4 +1,4 @@
-import { normalizePort } from '../src/utils/port';
+import { normalizePort } from '../../src/utils/port';
 import { describe, expect, it } from '@jest/globals';
 
 

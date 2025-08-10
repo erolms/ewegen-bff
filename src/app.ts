@@ -1,11 +1,12 @@
 // @ts-check
 
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import morgan from 'morgan';
+import { errorHandler } from './middlewares/error-middleware';
 import indexRouter from './routes/index';
 
 // Configure Winston logger
@@ -62,17 +63,14 @@ app.use(morgan('combined', {
   stream: { write: (message: string) => logger.error(message.trim()) },
 }))
 
-// Error handling middleware
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  logger.error('Error occurred', { error: err.message, stack: err.stack });
-  res.status(500).json({ error: 'Internal Server Error' });
-});
-
 app.disable("x-powered-by");
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Error handling middleware
+app.use(errorHandler);
 
 app.use('/', indexRouter);
 
