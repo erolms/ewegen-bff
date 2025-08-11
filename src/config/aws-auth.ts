@@ -3,7 +3,7 @@
  * Environment variables required for AWS Cognito integration with AWS SDK v3
  */
 
-export interface AuthConfig {
+export interface AwsAuthConfig {
   aws: {
     region: string;
   };
@@ -26,7 +26,7 @@ export interface AuthConfig {
 /**
  * Get authentication configuration from environment variables
  */
-export function getAuthConfig(): AuthConfig {
+export function getAuthConfig(): AwsAuthConfig {
   const userPoolId = process.env.COGNITO_USER_POOL_ID;
   const clientId = process.env.COGNITO_CLIENT_ID;
   const region = process.env.AWS_REGION || 'eu-central-1';
@@ -59,39 +59,3 @@ export function getAuthConfig(): AuthConfig {
     },
   };
 }
-
-/**
- * Validate authentication configuration
- */
-export function validateAuthConfig(): boolean {
-  try {
-    getAuthConfig();
-    return true;
-  } catch (error) {
-    console.error('Authentication configuration validation failed:', error);
-    return false;
-  }
-}
-
-/**
- * Get required environment variables for authentication
- */
-export function getRequiredEnvVars(): string[] {
-  return [
-    'COGNITO_USER_POOL_ID',
-    'COGNITO_CLIENT_ID',
-    'AWS_REGION',
-  ];
-}
-
-/**
- * Get optional environment variables for authentication
- */
-export function getOptionalEnvVars(): string[] {
-  return [
-    'COGNITO_CLIENT_SECRET',
-    'COGNITO_ADMIN_GROUP',
-    'COGNITO_MEMBER_GROUP',
-    'COGNITO_VOLUNTEER_GROUP',
-  ];
-} 

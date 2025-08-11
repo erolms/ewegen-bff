@@ -2,7 +2,7 @@ import request from 'supertest';
 import { describe, beforeEach, afterEach, expect, it, jest } from '@jest/globals';
 import app from '../src/app';
 import { UserRole } from '../src/middlewares/auth';
-import { getAuthConfig, validateAuthConfig } from '../src/config/auth';
+import { getAuthConfig } from '../src/config/aws-auth';
 import { authService } from '../src/services/auth-service';
 
 // Mock the authentication service
@@ -45,14 +45,6 @@ describe('Authentication System - Refactored Architecture', () => {
   });
 
   describe('Configuration', () => {
-    it('should validate auth config with required environment variables', () => {
-      process.env.COGNITO_USER_POOL_ID = 'eu-central-1_testpool';
-      process.env.COGNITO_CLIENT_ID = 'test-client-id';
-      process.env.AWS_REGION = 'eu-central-1';
-
-      expect(validateAuthConfig()).toBe(true);
-    });
-
     it('should throw error when COGNITO_USER_POOL_ID is missing', () => {
       process.env.COGNITO_CLIENT_ID = 'test-client-id';
       process.env.AWS_REGION = 'eu-central-1';
