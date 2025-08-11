@@ -1,5 +1,5 @@
 import { CognitoAuthDriver, AuthResult, UserRegistrationData, UserLoginData } from './auth-drivers/cognito-driver';
-import winston from 'winston';
+import Logger from '../middlewares/logger';
 
 /**
  * Authentication Service
@@ -8,26 +8,11 @@ import winston from 'winston';
  */
 export class AuthService {
   private driver: CognitoAuthDriver;
-  private logger: winston.Logger;
+  private logger;
 
   constructor() {
     this.driver = new CognitoAuthDriver();
-    this.logger = winston.createLogger({
-      level: 'info',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      ),
-      defaultMeta: { service: 'auth-service' },
-      transports: [
-        new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple()
-          )
-        })
-      ]
-    });
+    this.logger = Logger.getInstance();
   }
 
   /**

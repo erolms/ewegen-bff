@@ -1,26 +1,11 @@
 import { Router, Request, Response } from 'express';
-import winston from 'winston';
 import { authenticateToken, AuthenticatedRequest, getAuthStatus } from '../middlewares/auth';
 import { authService } from '../services/auth-service';
+import Logger from '../middlewares/logger';
 
 const router = Router();
 
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'ewegen-bff-auth-routes' },
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
-});
+const logger = Logger.getInstance();
 
 /**
  * User registration

@@ -126,17 +126,17 @@ COGNITO_VOLUNTEER_GROUP=volunteer-group
 
 1. Install dependencies:
 
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
 2. Set environment variables (see above)
 
 3. Start the development server:
 
-```bash
-npm run dev
-```
+   ```bash
+   npm run dev
+   ```
 
 ## API Endpoints
 

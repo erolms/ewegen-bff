@@ -1,25 +1,10 @@
 import { Router, Response } from 'express';
 import { authenticateToken, requireRole, AuthenticatedRequest, UserRole } from '../middlewares/auth';
-import winston from 'winston';
+import Logger from '../middlewares/logger';
 
 const router = Router();
 
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'ewegen-bff-protected-routes' },
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
-});
+const logger = Logger.getInstance();
 
 /**
  * Protected route - requires authentication

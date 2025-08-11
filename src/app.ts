@@ -3,59 +3,19 @@
 import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
-import winston from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
 import morgan from 'morgan';
+import Logger from './middlewares/logger';
 import { errorHandler } from './middlewares/error-middleware';
 import indexRouter from './routes/index';
 import authRoutes from './routes/auth';
 import protectedRoutes from './routes/protected';
 
-// Configure Winston logger
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'ewegen-bff' },
-  transports: [
-    // Console transport - logs all messages
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    }),
-    // Access log transport - standard server notation in JSON format
-    new DailyRotateFile({
-      filename: path.join(__dirname, '../logs/access-%DATE%.log'),
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '14d',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      )
-    }),
-    // Error log transport - error messages in JSON format
-    new DailyRotateFile({
-      filename: path.join(__dirname, '../logs/error-%DATE%.log'),
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '14d',
-      level: 'error',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      )
-    })
-  ]
-});
+// Import central logger instance
+const logger = Logger.getInstance();
 
 const app = express();
 
-// Use Morgan for HTTP request logging, output to Winston
+// Use Morgan for HTTP request logging, output to logger
 app.use(morgan('combined', {
   skip: function (_req, res) { return res.statusCode > 399 },
   stream: { write: (message: string) => logger.info(message.trim()) },

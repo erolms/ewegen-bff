@@ -7,7 +7,7 @@ import {
   ChangePasswordCommand,
   GetUserCommand
 } from '@aws-sdk/client-cognito-identity-provider';
-import winston from 'winston';
+import Logger from '../../middlewares/logger';
 
 // Error interface for AWS SDK errors
 interface AWSError extends Error {
@@ -58,7 +58,7 @@ export interface UserProfile {
  */
 export class CognitoAuthDriver {
   private client: CognitoIdentityProviderClient;
-  private logger: winston.Logger;
+  private logger;
   private userPoolId: string;
   private clientId: string;
 
@@ -74,22 +74,7 @@ export class CognitoAuthDriver {
       region: process.env.AWS_REGION || 'eu-central-1',
     });
 
-    this.logger = winston.createLogger({
-      level: 'info',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      ),
-      defaultMeta: { service: 'cognito-auth-driver' },
-      transports: [
-        new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple()
-          )
-        })
-      ]
-    });
+    this.logger = Logger.getInstance();
   }
 
   /**
