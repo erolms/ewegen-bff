@@ -292,4 +292,4 @@ export function getAuthStatus(): { configured: boolean; driver: { name: string; 
     configured: authService.isConfigured(),
     driver: serviceInfo.driver
   };
-} 
+}
