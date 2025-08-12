@@ -1,3 +1,8 @@
+// Ensure required env vars are present before modules import
+process.env.COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID || 'eu-central-1_testpool123';
+process.env.COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID || 'test-client-id';
+process.env.AWS_REGION = process.env.AWS_REGION || 'eu-central-1';
+
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { 
@@ -6,7 +11,8 @@ import {
   optionalAuth, 
   getAuthStatus,
   UserRole,
-  AuthenticatedRequest 
+  AuthenticatedRequest,
+  __test__
 } from '../../src/middlewares/auth';
 import { authService } from '../../src/services/auth-service';
 import { beforeEach, describe, expect, it, jest, afterEach } from '@jest/globals';
@@ -55,9 +61,10 @@ describe('Auth Middleware', () => {
     mockNext = jest.fn() as unknown as jest.MockedFunction<NextFunction>;
 
     // Setup environment variables
-    process.env.COGNITO_USER_POOL_ID = 'eu-central-1_testpool123';
-    process.env.AWS_REGION = 'eu-central-1';
-
+    process.env.COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID || 'eu-central-1_testpool123';
+    process.env.COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID || 'test-client-id';
+    process.env.AWS_REGION = process.env.AWS_REGION || 'eu-central-1';
+    
     // Setup default auth service mock
     mockAuthService.getServiceInfo.mockReturnValue({
       driver: { name: 'cognito', version: '1.0.0', configured: true }
@@ -83,17 +90,18 @@ describe('Auth Middleware', () => {
     };
 
     beforeEach(() => {
-      // Setup JWT decode mock to return both header and payload
-      mockJwt.decode = jest.fn((_token: string, options?: { complete?: boolean }) => {
+      // Setup JWT decode mock to return both header and payload (typed via jest.Mock)
+      (mockJwt.decode as unknown as jest.Mock).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as { complete?: boolean } | undefined;
         if (options?.complete) {
-          return { 
-            header: { kid: 'test-kid', alg: 'RS256', typ: 'JWT' }, 
+          return {
+            header: { kid: 'test-kid', alg: 'RS256', typ: 'JWT' },
             payload: mockDecodedToken,
             signature: 'mock-signature'
           } as unknown as jwt.Jwt;
         }
         return mockDecodedToken as unknown as jwt.JwtPayload;
-      }) as unknown as jest.MockedFunction<typeof jwt.decode>;
+      });
 
       // Setup fetch mock for JWKs
       mockFetch.mockResolvedValue({
@@ -113,6 +121,16 @@ describe('Auth Middleware', () => {
     });
 
     it('should authenticate valid token successfully', async () => {
+      __test__.resetJwksCache();
+      // Ensure JWKs are available for this test
+      mockFetch.mockResolvedValue({
+        json: jest.fn().mockResolvedValue({
+          keys: [
+            { kty: 'RSA', kid: 'test-kid', use: 'sig', alg: 'RS256', n: 'test-n', e: 'AQAB' }
+          ]
+        } as never)
+      } as unknown as globalThis.Response);
+
       mockRequest.headers = {
         authorization: `Bearer ${mockToken}`
       };
@@ -150,6 +168,9 @@ describe('Auth Middleware', () => {
         authorization: 'InvalidFormat token'
       };
 
+      // Force decode to fail for this call
+      (mockJwt.decode as unknown as jest.Mock).mockImplementationOnce(() => null);
+
       await authenticateToken(
         mockRequest as AuthenticatedRequest,
         mockResponse as Response,
@@ -161,12 +182,22 @@ describe('Auth Middleware', () => {
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should return 401 when token is expired', async () => {
+    it('should return 403 when token is expired', async () => {
       const expiredToken = {
         ...mockDecodedToken,
         exp: Math.floor(Date.now() / 1000) - 3600 // 1 hour ago
       };
-      mockJwt.decode.mockReturnValue(expiredToken);
+      (mockJwt.decode as unknown as jest.Mock).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as { complete?: boolean } | undefined;
+        if (options?.complete) {
+          return {
+            header: { kid: 'test-kid', alg: 'RS256', typ: 'JWT' },
+            payload: expiredToken,
+            signature: 'mock-signature'
+          } as unknown as jwt.Jwt;
+        }
+        return expiredToken as unknown as jwt.JwtPayload;
+      });
 
       mockRequest.headers = {
         authorization: `Bearer ${mockToken}`
@@ -179,12 +210,12 @@ describe('Auth Middleware', () => {
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(403);
-      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Token expired' });
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Invalid token' });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
     it('should return 403 when token verification fails', async () => {
-      mockJwt.decode.mockReturnValue(null);
+      (mockJwt.decode as unknown as jest.Mock).mockReturnValue(null);
 
       mockRequest.headers = {
         authorization: `Bearer ${mockToken}`
@@ -206,7 +237,17 @@ describe('Auth Middleware', () => {
         ...mockDecodedToken,
         'cognito:groups': undefined
       };
-      mockJwt.decode.mockReturnValue(tokenWithoutGroups);
+      (mockJwt.decode as unknown as jest.Mock).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as { complete?: boolean } | undefined;
+        if (options?.complete) {
+          return {
+            header: { kid: 'test-kid', alg: 'RS256', typ: 'JWT' },
+            payload: tokenWithoutGroups,
+            signature: 'mock-signature'
+          } as unknown as jwt.Jwt;
+        }
+        return tokenWithoutGroups as unknown as jwt.JwtPayload;
+      });
 
       mockRequest.headers = {
         authorization: `Bearer ${mockToken}`
@@ -227,7 +268,17 @@ describe('Auth Middleware', () => {
         ...mockDecodedToken,
         'cognito:groups': ['unknown-group']
       };
-      mockJwt.decode.mockReturnValue(tokenWithUnknownGroups);
+      (mockJwt.decode as unknown as jest.Mock).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as { complete?: boolean } | undefined;
+        if (options?.complete) {
+          return {
+            header: { kid: 'test-kid', alg: 'RS256', typ: 'JWT' },
+            payload: tokenWithUnknownGroups,
+            signature: 'mock-signature'
+          } as unknown as jwt.Jwt;
+        }
+        return tokenWithUnknownGroups as unknown as jwt.JwtPayload;
+      });
 
       mockRequest.headers = {
         authorization: `Bearer ${mockToken}`
@@ -244,6 +295,7 @@ describe('Auth Middleware', () => {
     });
 
     it('should handle fetch errors for JWKs', async () => {
+      __test__.resetJwksCache();
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       mockRequest.headers = {
@@ -263,6 +315,110 @@ describe('Auth Middleware', () => {
 
     it('should handle missing COGNITO_USER_POOL_ID environment variable', async () => {
       delete process.env.COGNITO_USER_POOL_ID;
+
+      mockRequest.headers = {
+        authorization: `Bearer ${mockToken}`
+      };
+
+      await authenticateToken(
+        mockRequest as AuthenticatedRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(403);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Invalid token' });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should return 403 when token header lacks kid', async () => {
+      // First decode call with complete: true returns header without kid
+      (mockJwt.decode as unknown as jest.Mock).mockImplementationOnce((...args: unknown[]) => {
+        const options = args[1] as { complete?: boolean } | undefined;
+        if (options?.complete) {
+          return { header: { alg: 'RS256', typ: 'JWT' }, payload: mockDecodedToken, signature: 'sig' } as unknown as jwt.Jwt;
+        }
+        return mockDecodedToken as unknown as jwt.JwtPayload;
+      });
+
+      mockRequest.headers = {
+        authorization: `Bearer ${mockToken}`
+      };
+
+      await authenticateToken(
+        mockRequest as AuthenticatedRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(403);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Invalid token' });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should return 403 when JWK for kid not found', async () => {
+      // Ensure cache is clear so we read the mocked JWKs below
+      __test__.resetJwksCache();
+
+      // JWKs do not include matching kid
+      mockFetch.mockResolvedValue({
+        json: jest.fn().mockResolvedValue({
+          keys: [{ kty: 'RSA', kid: 'another-kid', use: 'sig', alg: 'RS256', n: 'n', e: 'AQAB' }]
+        } as never)
+      } as unknown as globalThis.Response);
+
+      mockRequest.headers = {
+        authorization: `Bearer ${mockToken}`
+      };
+
+      await authenticateToken(
+        mockRequest as AuthenticatedRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(403);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Invalid token' });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should return 403 when issuer mismatches', async () => {
+      const wrongIssuerPayload = { ...mockDecodedToken, iss: 'https://wrong-issuer.example.com' };
+      (mockJwt.decode as unknown as jest.Mock).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as { complete?: boolean } | undefined;
+        if (options?.complete) {
+          return {
+            header: { kid: 'test-kid', alg: 'RS256', typ: 'JWT' },
+            payload: wrongIssuerPayload,
+            signature: 'sig'
+          } as unknown as jwt.Jwt;
+        }
+        return wrongIssuerPayload as unknown as jwt.JwtPayload;
+      });
+
+      mockRequest.headers = {
+        authorization: `Bearer ${mockToken}`
+      };
+
+      await authenticateToken(
+        mockRequest as AuthenticatedRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(403);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Invalid token' });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('should return 403 when decode returns a string for header', async () => {
+      (mockJwt.decode as unknown as jest.Mock).mockImplementationOnce((...args: unknown[]) => {
+        const options = args[1] as { complete?: boolean } | undefined;
+        if (options?.complete) {
+          return 'not-an-object' as unknown as jwt.Jwt;
+        }
+        return mockDecodedToken as unknown as jwt.JwtPayload;
+      });
 
       mockRequest.headers = {
         authorization: `Bearer ${mockToken}`
@@ -374,7 +530,18 @@ describe('Auth Middleware', () => {
     };
 
     beforeEach(() => {
-      mockJwt.decode.mockReturnValue(mockDecodedToken);
+      // Provide complete:true header and payload behavior
+      (mockJwt.decode as unknown as jest.Mock).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as { complete?: boolean } | undefined;
+        if (options?.complete) {
+          return {
+            header: { kid: 'test-kid', alg: 'RS256', typ: 'JWT' },
+            payload: mockDecodedToken,
+            signature: 'sig'
+          } as unknown as jwt.Jwt;
+        }
+        return mockDecodedToken as unknown as jwt.JwtPayload;
+      });
       mockFetch.mockResolvedValue({
         json: jest.fn().mockResolvedValue({
           keys: [{ kty: 'RSA', kid: 'test-kid', use: 'sig', alg: 'RS256', n: 'test-n', e: 'AQAB' }]
@@ -396,6 +563,7 @@ describe('Auth Middleware', () => {
     });
 
     it('should authenticate when valid token provided', async () => {
+      __test__.resetJwksCache();
       mockRequest.headers = {
         authorization: `Bearer ${mockToken}`
       };
@@ -455,6 +623,9 @@ describe('Auth Middleware', () => {
         authorization: 'InvalidFormat token'
       };
 
+      // Force decode failure to simulate invalid/malformed token handling
+      (mockJwt.decode as unknown as jest.Mock).mockImplementationOnce(() => null);
+
       await optionalAuth(
         mockRequest as AuthenticatedRequest,
         mockResponse as Response,
@@ -466,6 +637,7 @@ describe('Auth Middleware', () => {
     });
 
     it('should handle network errors gracefully', async () => {
+      __test__.resetJwksCache();
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       mockRequest.headers = {
@@ -526,10 +698,22 @@ describe('Auth Middleware', () => {
     };
 
     beforeEach(() => {
-      mockJwt.decode.mockReturnValue(mockDecodedToken);
+      // Proper decode behavior: header when complete, payload otherwise
+      (mockJwt.decode as unknown as jest.Mock).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as { complete?: boolean } | undefined;
+        if (options?.complete) {
+          return {
+            header: { kid: 'test-kid', alg: 'RS256', typ: 'JWT' },
+            payload: mockDecodedToken,
+            signature: 'sig'
+          } as unknown as jwt.Jwt;
+        }
+        return mockDecodedToken as unknown as jwt.JwtPayload;
+      });
     });
 
     it('should cache JWKs and reuse them for subsequent requests', async () => {
+      __test__.resetJwksCache();
       const mockJwksResponse = {
         keys: [
           {
@@ -560,9 +744,8 @@ describe('Auth Middleware', () => {
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
 
-      // Reset mocks
-      jest.clearAllMocks();
-      mockJwt.decode.mockReturnValue(mockDecodedToken);
+      // Reset only fetch call count; keep decode and cache intact
+      mockFetch.mockClear();
 
       // Second request - should use cached JWKs
       await authenticateToken(
@@ -572,6 +755,43 @@ describe('Auth Middleware', () => {
       );
 
       expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should refetch JWKs after cache expiry', async () => {
+      __test__.resetJwksCache();
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2025-01-01T00:00:00Z'));
+
+      mockFetch.mockResolvedValue({
+        json: jest.fn().mockResolvedValue({
+          keys: [{ kty: 'RSA', kid: 'test-kid', use: 'sig', alg: 'RS256', n: 'n1', e: 'AQAB' }]
+        } as never)
+      } as unknown as globalThis.Response);
+
+      mockRequest.headers = {
+        authorization: `Bearer ${mockToken}`
+      } as Record<string, string>;
+
+      await authenticateToken(
+        mockRequest as AuthenticatedRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      // Advance time beyond 1 hour
+      jest.setSystemTime(new Date('2025-01-01T01:01:00Z'));
+
+      // Next call should refetch
+      await authenticateToken(
+        mockRequest as AuthenticatedRequest,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      jest.useRealTimers();
     });
   });
 

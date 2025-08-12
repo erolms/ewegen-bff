@@ -186,7 +186,7 @@ export async function authenticateToken(
     
     // Check if token is expired
     if (decoded.exp * 1000 < Date.now()) {
-      res.status(401).json({ error: 'Token expired' });
+      res.status(403).json({ error: 'Token expired' });
       return;
     }
 
@@ -299,3 +299,11 @@ export function getAuthStatus(): { configured: boolean; driver: { name: string; 
     driver: serviceInfo.driver
   };
 }
+
+// Test-only hooks to control internal cache
+export const __test__ = {
+  resetJwksCache: (): void => {
+    jwksCache = {};
+    jwksCacheExpiry = 0;
+  }
+};
