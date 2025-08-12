@@ -84,15 +84,16 @@ describe('Auth Middleware', () => {
 
     beforeEach(() => {
       // Setup JWT decode mock to return both header and payload
-      (mockJwt.decode as any).mockImplementation((_token: string, options?: { complete?: boolean }) => {
+      mockJwt.decode = jest.fn((_token: string, options?: { complete?: boolean }) => {
         if (options?.complete) {
-          return {
-            header: { kid: 'test-kid' },
-            payload: mockDecodedToken
+          return { 
+            header: { kid: 'test-kid', alg: 'RS256', typ: 'JWT' }, 
+            payload: mockDecodedToken,
+            signature: 'mock-signature'
           } as unknown as jwt.Jwt;
         }
         return mockDecodedToken as unknown as jwt.JwtPayload;
-      });
+      }) as unknown as jest.MockedFunction<typeof jwt.decode>;
 
       // Setup fetch mock for JWKs
       mockFetch.mockResolvedValue({

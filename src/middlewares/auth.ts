@@ -95,11 +95,13 @@ async function verifyToken(token: string): Promise<JWTPayload> {
     // Decode token header to get kid
     const decodedHeader = jwt.decode(token, { complete: true });
     if (!decodedHeader || typeof decodedHeader === 'string') {
+      logger.error('Invalid token format', { token });
       throw new Error('Invalid token format');
     }
 
     const kid = decodedHeader.header.kid;
     if (!kid) {
+      logger.error('Token missing key ID', { token });
       throw new Error('Token missing key ID');
     }
 
@@ -108,6 +110,7 @@ async function verifyToken(token: string): Promise<JWTPayload> {
     const jwk = jwks[kid];
 
     if (!jwk) {
+      logger.error('Token key not found in JWKs', { token });
       throw new Error('Token key not found in JWKs');
     }
 
@@ -117,17 +120,20 @@ async function verifyToken(token: string): Promise<JWTPayload> {
     const decoded = jwt.decode(token) as JWTPayload;
     
     if (!decoded) {
+      logger.error('Invalid token not decoded', { token });
       throw new Error('Invalid token');
     }
 
     // Verify issuer
     const expectedIssuer = `https://cognito-idp.${process.env.AWS_REGION || 'eu-central-1'}.amazonaws.com/${process.env.COGNITO_USER_POOL_ID}`;
     if (decoded.iss && decoded.iss !== expectedIssuer) {
+      logger.error('Invalid token issuer', { token });
       throw new Error('Invalid token issuer');
     }
 
     // Check expiration
     if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+      logger.error('Token expired', { token });
       throw new Error('Token expired');
     }
 
