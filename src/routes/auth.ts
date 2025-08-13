@@ -8,10 +8,9 @@ const router = Router();
 const logger = Logger.getInstance();
 
 /**
- * User registration
- * POST /auth/register
+ * User registration handler
  */
-router.post('/register', async (req: Request, res: Response): Promise<void> => {
+async function handleRegister(req: Request, res: Response): Promise<void> {
   try {
     const { email, password, firstName, lastName } = req.body;
 
@@ -58,13 +57,18 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     });
     res.status(500).json({ error: 'Registration failed' });
   }
-});
+}
 
 /**
- * User login
- * POST /auth/login
+ * User registration
+ * POST /auth/register
  */
-router.post('/login', async (req: Request, res: Response): Promise<void> => {
+router.post('/register', handleRegister);
+
+/**
+ * User login handler
+ */
+async function handleLogin(req: Request, res: Response): Promise<void> {
   try {
     const { email, password } = req.body;
 
@@ -113,13 +117,18 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     });
     res.status(500).json({ error: 'Login failed' });
   }
-});
+}
 
 /**
- * Confirm user registration
- * POST /auth/confirm
+ * User login
+ * POST /auth/login
  */
-router.post('/confirm', async (req: Request, res: Response): Promise<void> => {
+router.post('/login', handleLogin);
+
+/**
+ * Confirm user registration handler
+ */
+async function handleConfirm(req: Request, res: Response): Promise<void> {
   try {
     const { email, confirmationCode } = req.body;
 
@@ -158,13 +167,18 @@ router.post('/confirm', async (req: Request, res: Response): Promise<void> => {
     });
     res.status(500).json({ error: 'Confirmation failed' });
   }
-});
+}
 
 /**
- * Refresh access token
- * POST /auth/refresh
+ * Confirm user registration
+ * POST /auth/confirm
  */
-router.post('/refresh', async (req: Request, res: Response): Promise<void> => {
+router.post('/confirm', handleConfirm);
+
+/**
+ * Refresh access token handler
+ */
+async function handleRefresh(req: Request, res: Response): Promise<void> {
   try {
     const { refreshToken } = req.body;
 
@@ -200,13 +214,18 @@ router.post('/refresh', async (req: Request, res: Response): Promise<void> => {
     });
     res.status(500).json({ error: 'Token refresh failed' });
   }
-});
+}
 
 /**
- * Get current user profile
- * GET /auth/profile
+ * Refresh access token
+ * POST /auth/refresh
  */
-router.get('/profile', authenticateToken, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+router.post('/refresh', handleRefresh);
+
+/**
+ * Get current user profile handler
+ */
+async function handleGetProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
     if (!req.user) {
       res.status(401).json({ error: 'User not authenticated' });
@@ -241,13 +260,18 @@ router.get('/profile', authenticateToken, async (req: AuthenticatedRequest, res:
     logger.error('Get profile failed', { error: error instanceof Error ? error.message : 'Unknown error' });
     res.status(500).json({ error: 'Failed to get profile' });
   }
-});
+}
 
 /**
- * Logout user
- * POST /auth/logout
+ * Get current user profile
+ * GET /auth/profile
  */
-router.post('/logout', authenticateToken, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+router.get('/profile', authenticateToken, handleGetProfile);
+
+/**
+ * Logout user handler
+ */
+async function handleLogout(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
     const { refreshToken } = req.body;
 
@@ -275,13 +299,18 @@ router.post('/logout', authenticateToken, async (req: AuthenticatedRequest, res:
     });
     res.status(500).json({ error: 'Logout failed' });
   }
-});
+}
 
 /**
- * Change password
- * POST /auth/change-password
+ * Logout user
+ * POST /auth/logout
  */
-router.post('/change-password', authenticateToken, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+router.post('/logout', authenticateToken, handleLogout);
+
+/**
+ * Change password handler
+ */
+async function handleChangePassword(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
     const { oldPassword, newPassword } = req.body;
 
@@ -327,13 +356,18 @@ router.post('/change-password', authenticateToken, async (req: AuthenticatedRequ
     });
     res.status(500).json({ error: 'Password change failed' });
   }
-});
+}
 
 /**
- * Health check endpoint for authentication service
- * GET /auth/health
+ * Change password
+ * POST /auth/change-password
  */
-router.get('/health', (_req: Request, res: Response): void => {
+router.post('/change-password', authenticateToken, handleChangePassword);
+
+/**
+ * Health check handler for authentication service
+ */
+function handleHealth(_req: Request, res: Response): void {
   const authStatus = getAuthStatus();
   
   res.status(200).json({
@@ -343,6 +377,24 @@ router.get('/health', (_req: Request, res: Response): void => {
     cognitoConfigured: authStatus.configured,
     driver: authStatus.driver
   });
-});
+}
 
-export default router; 
+/**
+ * Health check endpoint for authentication service
+ * GET /auth/health
+ */
+router.get('/health', handleHealth);
+
+export default router;
+
+// Test exports for unit testing
+export const _test = {
+  handleRegister,
+  handleLogin,
+  handleConfirm,
+  handleRefresh,
+  handleGetProfile,
+  handleLogout,
+  handleChangePassword,
+  handleHealth
+};
