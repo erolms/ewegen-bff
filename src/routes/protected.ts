@@ -7,10 +7,9 @@ const router = Router();
 const logger = Logger.getInstance();
 
 /**
- * Protected route - requires authentication
- * GET /protected/user-info
+ * Protected route handler - requires authentication
  */
-router.get('/user-info', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
+function handleUserInfo(req: AuthenticatedRequest, res: Response): void {
   try {
     if (!req.user) {
       res.status(401).json({ error: 'User not authenticated' });
@@ -35,7 +34,41 @@ router.get('/user-info', authenticateToken, (req: AuthenticatedRequest, res: Res
     logger.error('Get user info failed', { error: error instanceof Error ? error.message : 'Unknown error' });
     res.status(500).json({ error: 'Failed to get user information' });
   }
-});
+}
+
+/**
+ * Protected route - requires authentication
+ * GET /protected/user-info
+ */
+router.get('/user-info', authenticateToken, handleUserInfo);
+
+/**
+ * Admin-only route handler
+ */
+function handleAdminDashboard(req: AuthenticatedRequest, res: Response): void {
+  try {
+    logger.info('Admin dashboard accessed', { userId: req.user?.sub });
+
+    res.status(200).json({
+      message: 'Admin dashboard data',
+      data: {
+        totalUsers: 150,
+        activeProjects: 25,
+        totalDonations: 50000,
+        recentActivity: [
+          { action: 'User registered', timestamp: new Date().toISOString() },
+          { action: 'Payment processed', timestamp: new Date().toISOString() },
+          { action: 'Project created', timestamp: new Date().toISOString() }
+        ]
+      },
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error('Admin dashboard access failed', { error: error instanceof Error ? error.message : 'Unknown error' });
+    res.status(500).json({ error: 'Failed to access admin dashboard' });
+  }
+}
 
 /**
  * Admin-only route
@@ -44,31 +77,39 @@ router.get('/user-info', authenticateToken, (req: AuthenticatedRequest, res: Res
 router.get('/admin-dashboard', 
   authenticateToken, 
   requireRole([UserRole.ADMIN]), 
-  (req: AuthenticatedRequest, res: Response): void => {
-    try {
-      logger.info('Admin dashboard accessed', { userId: req.user?.sub });
-
-      res.status(200).json({
-        message: 'Admin dashboard data',
-        data: {
-          totalUsers: 150,
-          activeProjects: 25,
-          totalDonations: 50000,
-          recentActivity: [
-            { action: 'User registered', timestamp: new Date().toISOString() },
-            { action: 'Payment processed', timestamp: new Date().toISOString() },
-            { action: 'Project created', timestamp: new Date().toISOString() }
-          ]
-        },
-        timestamp: new Date().toISOString()
-      });
-
-    } catch (error) {
-      logger.error('Admin dashboard access failed', { error: error instanceof Error ? error.message : 'Unknown error' });
-      res.status(500).json({ error: 'Failed to access admin dashboard' });
-    }
-  }
+  handleAdminDashboard
 );
+
+/**
+ * Member-only route handler
+ */
+function handleMemberProfile(req: AuthenticatedRequest, res: Response): void {
+  try {
+    logger.info('Member profile accessed', { userId: req.user?.sub });
+
+    res.status(200).json({
+      message: 'Member profile data',
+      profile: {
+        memberId: req.user?.sub,
+        email: req.user?.email,
+        membershipLevel: 'Premium',
+        joinDate: '2024-01-15',
+        totalDonations: 2500,
+        activeProjects: 3,
+        preferences: {
+          newsletter: true,
+          notifications: true,
+          language: 'de'
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error('Member profile access failed', { error: error instanceof Error ? error.message : 'Unknown error' });
+    res.status(500).json({ error: 'Failed to access member profile' });
+  }
+}
 
 /**
  * Member-only route
@@ -77,34 +118,46 @@ router.get('/admin-dashboard',
 router.get('/member-profile', 
   authenticateToken, 
   requireRole([UserRole.MEMBER, UserRole.ADMIN]), 
-  (req: AuthenticatedRequest, res: Response): void => {
-    try {
-      logger.info('Member profile accessed', { userId: req.user?.sub });
-
-      res.status(200).json({
-        message: 'Member profile data',
-        profile: {
-          memberId: req.user?.sub,
-          email: req.user?.email,
-          membershipLevel: 'Premium',
-          joinDate: '2024-01-15',
-          totalDonations: 2500,
-          activeProjects: 3,
-          preferences: {
-            newsletter: true,
-            notifications: true,
-            language: 'de'
-          }
-        },
-        timestamp: new Date().toISOString()
-      });
-
-    } catch (error) {
-      logger.error('Member profile access failed', { error: error instanceof Error ? error.message : 'Unknown error' });
-      res.status(500).json({ error: 'Failed to access member profile' });
-    }
-  }
+  handleMemberProfile
 );
+
+/**
+ * Volunteer-only route handler
+ */
+function handleVolunteerTasks(req: AuthenticatedRequest, res: Response): void {
+  try {
+    logger.info('Volunteer tasks accessed', { userId: req.user?.sub });
+
+    res.status(200).json({
+      message: 'Volunteer tasks data',
+      tasks: [
+        {
+          id: 'task-001',
+          title: 'Food Bank Distribution',
+          description: 'Help distribute food packages to families in need',
+          location: 'Community Center',
+          date: '2024-02-15',
+          duration: '4 hours',
+          status: 'assigned'
+        },
+        {
+          id: 'task-002',
+          title: 'Elderly Care Visit',
+          description: 'Visit elderly community members for companionship',
+          location: 'Various homes',
+          date: '2024-02-20',
+          duration: '2 hours',
+          status: 'available'
+        }
+      ],
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error('Volunteer tasks access failed', { error: error instanceof Error ? error.message : 'Unknown error' });
+    res.status(500).json({ error: 'Failed to access volunteer tasks' });
+  }
+}
 
 /**
  * Volunteer-only route
@@ -113,41 +166,47 @@ router.get('/member-profile',
 router.get('/volunteer-tasks', 
   authenticateToken, 
   requireRole([UserRole.VOLUNTEER, UserRole.ADMIN]), 
-  (req: AuthenticatedRequest, res: Response): void => {
-    try {
-      logger.info('Volunteer tasks accessed', { userId: req.user?.sub });
-
-      res.status(200).json({
-        message: 'Volunteer tasks data',
-        tasks: [
-          {
-            id: 'task-001',
-            title: 'Food Bank Distribution',
-            description: 'Help distribute food packages to families in need',
-            location: 'Community Center',
-            date: '2024-02-15',
-            duration: '4 hours',
-            status: 'assigned'
-          },
-          {
-            id: 'task-002',
-            title: 'Elderly Care Visit',
-            description: 'Visit elderly community members for companionship',
-            location: 'Various homes',
-            date: '2024-02-20',
-            duration: '2 hours',
-            status: 'available'
-          }
-        ],
-        timestamp: new Date().toISOString()
-      });
-
-    } catch (error) {
-      logger.error('Volunteer tasks access failed', { error: error instanceof Error ? error.message : 'Unknown error' });
-      res.status(500).json({ error: 'Failed to access volunteer tasks' });
-    }
-  }
+  handleVolunteerTasks
 );
+
+/**
+ * Multi-role route handler (accessible by members, volunteers, and admins)
+ */
+function handleCommunityEvents(req: AuthenticatedRequest, res: Response): void {
+  try {
+    logger.info('Community events accessed', { userId: req.user?.sub, roles: req.user?.roles });
+
+    res.status(200).json({
+      message: 'Community events data',
+      events: [
+        {
+          id: 'event-001',
+          title: 'Charity Fundraiser',
+          description: 'Annual fundraising event for local charities',
+          date: '2024-03-15',
+          location: 'Town Hall',
+          attendees: 45,
+          maxCapacity: 100
+        },
+        {
+          id: 'event-002',
+          title: 'Volunteer Training',
+          description: 'Training session for new volunteers',
+          date: '2024-03-20',
+          location: 'Community Center',
+          attendees: 12,
+          maxCapacity: 25
+        }
+      ],
+      userRole: req.user?.roles,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error('Community events access failed', { error: error instanceof Error ? error.message : 'Unknown error' });
+    res.status(500).json({ error: 'Failed to access community events' });
+  }
+}
 
 /**
  * Multi-role route (accessible by members, volunteers, and admins)
@@ -156,48 +215,13 @@ router.get('/volunteer-tasks',
 router.get('/community-events', 
   authenticateToken, 
   requireRole([UserRole.MEMBER, UserRole.VOLUNTEER, UserRole.ADMIN]), 
-  (req: AuthenticatedRequest, res: Response): void => {
-    try {
-      logger.info('Community events accessed', { userId: req.user?.sub, roles: req.user?.roles });
-
-      res.status(200).json({
-        message: 'Community events data',
-        events: [
-          {
-            id: 'event-001',
-            title: 'Charity Fundraiser',
-            description: 'Annual fundraising event for local charities',
-            date: '2024-03-15',
-            location: 'Town Hall',
-            attendees: 45,
-            maxCapacity: 100
-          },
-          {
-            id: 'event-002',
-            title: 'Volunteer Training',
-            description: 'Training session for new volunteers',
-            date: '2024-03-20',
-            location: 'Community Center',
-            attendees: 12,
-            maxCapacity: 25
-          }
-        ],
-        userRole: req.user?.roles,
-        timestamp: new Date().toISOString()
-      });
-
-    } catch (error) {
-      logger.error('Community events access failed', { error: error instanceof Error ? error.message : 'Unknown error' });
-      res.status(500).json({ error: 'Failed to access community events' });
-    }
-  }
+  handleCommunityEvents
 );
 
 /**
- * Health check for protected routes
- * GET /protected/health
+ * Health check handler for protected routes
  */
-router.get('/health', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
+function handleHealth(req: AuthenticatedRequest, res: Response): void {
   res.status(200).json({
     status: 'ok',
     service: 'eWegen BFF Protected Routes',
@@ -205,6 +229,22 @@ router.get('/health', authenticateToken, (req: AuthenticatedRequest, res: Respon
     userRoles: req.user?.roles || [],
     timestamp: new Date().toISOString()
   });
-});
+}
 
-export default router; 
+/**
+ * Health check for protected routes
+ * GET /protected/health
+ */
+router.get('/health', authenticateToken, handleHealth);
+
+export default router;
+
+// Test exports for unit testing
+export const _test = {
+  handleUserInfo,
+  handleAdminDashboard,
+  handleMemberProfile,
+  handleVolunteerTasks,
+  handleCommunityEvents,
+  handleHealth
+};
