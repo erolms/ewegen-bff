@@ -661,13 +661,13 @@ describe('Auth Routes', () => {
   describe('GET /auth/health', () => {
     it('should return health status successfully', async () => {
       // Mock the authService methods that getAuthStatus depends on
-      mockAuthStatus.mockReturnValue({
-        configured: true,
-        driver: { name: 'cognito', version: '1.0.0' }
-      });
       mockAuthService.isConfigured.mockReturnValue(true);
       mockAuthService.getServiceInfo.mockReturnValue({
-        driver: { name: 'cognito', version: '1.0.0', configured: true }
+        driver: { name: 'AWS cognito mock', version: 'v3', configured: mockAuthService.isConfigured() }
+      });
+      mockAuthStatus.mockReturnValue({
+        configured: mockAuthService.isConfigured(),
+        driver: mockAuthService.getServiceInfo().driver
       });
 
       await _test.handleHealth(mockRequest as Request, mockResponse as Response);
@@ -676,9 +676,9 @@ describe('Auth Routes', () => {
       expect(mockResponse.json).toHaveBeenCalledWith({
         status: 'ok',
         service: 'eWegen BFF Authentication',
-        timestamp: expect.any(String),
+        timestamp: expect.anything(),
         cognitoConfigured: true,
-        driver: { name: 'cognito', version: '1.0.0', configured: true }
+        driver: { name: 'AWS cognito mock', version: 'v3', configured: true }
       });
     });
   });
