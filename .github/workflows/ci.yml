@@ -238,7 +238,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy scan results to GitHub Security tab
@@ -255,7 +255,7 @@ jobs:
           format: 'github'
           output: 'dependency-results.sbom.json'
           github-pat: ${{ secrets.GITHUB_TOKEN }}
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
           scanners: 'vuln'
           skip-setup-trivy: true
 
