@@ -1,5 +1,5 @@
 # Build stage
-FROM node:lts-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -17,7 +17,10 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:lts-alpine AS production
+FROM node:24-alpine AS production
+
+# Update all alpine linux packages
+RUN apk update && apk upgrade --available
 
 # Create a non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -29,7 +32,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
@@ -52,7 +55,10 @@ USER appuser
 CMD ["node", "dist/ewegen-bff-service.js"]
 
 # Development stage
-FROM node:lts-alpine AS development
+FROM node:24-alpine AS development
+
+# Update all alpine linux packages
+RUN apk update && apk upgrade --available
 
 # Set working directory
 WORKDIR /app
