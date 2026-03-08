@@ -233,20 +233,18 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod
-          format: 'table'
-          exit-code: '1'
+          format: 'sarif'
+          exit-code: 1
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-          output: 'trivy-results.txt'
+          output: 'trivy-results.sarif'
 
-      - name: Upload Trivy scan results
-        uses: actions/upload-artifact@v4
+      - name: Upload Trivy scan results to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
         with:
-          name: trivy-scan-results
-          path: trivy-results.txt
-          if-no-files-found: warn
-          retention-days: 14
+          sarif_file: 'trivy-results.sarif'
 
       - name: Generate SBOM
         uses: aquasecurity/trivy-action@master
@@ -258,10 +256,11 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
           severity: 'CRITICAL,HIGH'
           scanners: 'vuln'
+          skip-setup-trivy: true
 
       - name: Upload trivy SBOM report as a Github artifact
         uses: actions/upload-artifact@v4
         with:
           name: trivy-sbom-report
           path: '${{ github.workspace }}/dependency-results.sbom.json'
-          retention-days: 14
+          retention-days: 30
