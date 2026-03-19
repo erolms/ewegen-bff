@@ -22,6 +22,9 @@ FROM node:24-alpine AS production
 # Update all alpine linux packages
 RUN apk update && apk upgrade --available
 
+# Update preinstalled npm packages
+RUN npm install -g --force npm corepack
+
 # Create a non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
@@ -59,6 +62,9 @@ FROM node:24-alpine AS development
 
 # Update all alpine linux packages
 RUN apk update && apk upgrade --available
+
+# Update preinstalled npm packages
+RUN npm install -g --force npm corepack
 
 # Set working directory
 WORKDIR /app
